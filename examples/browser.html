@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8">
+  <title>Bangla date</title>
+</head>
+<body>
+  <p id="today"></p>
+  <script type="module">
+    // Serve the repository root with any static server after `npm run build`,
+    // then open examples/browser.html. The library has no dependencies.
+    import { formatBangla, today } from '../dist/esm/index.js';
+    document.getElementById('today').textContent = formatBangla(today(), 'dddd, Do MMMM YYYY E, R');
+  </script>
+</body>
+</html>
