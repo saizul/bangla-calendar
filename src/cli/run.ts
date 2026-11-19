@@ -14,6 +14,7 @@ import { type Zone, today, toBangla } from '../convert.js';
 import { eventsInYear } from '../events.js';
 import { formatBangla } from '../format.js';
 import { formatIsoDate, parseIsoDate, weekdayFromDays } from '../gregorian.js';
+import { toICalendar } from '../ical.js';
 import { renderMonth } from '../month-view.js';
 import { type Locale, monthName, seasonName, WEEKDAYS_EN, weekdayName } from '../names.js';
 import { parseBanglaDate } from '../parse.js';
@@ -39,6 +40,8 @@ Commands:
   convert <bangla date>          same as --to-gregorian when the text is not YYYY-MM-DD
   month [year] [month]           month view; year and month are Bangla (default: current)
   events [year]                  fixed national days in a Bangla year (default: current)
+  ics [year] [count]             iCalendar file with every day and national day of count
+                                 Bangla years from year (default: current year, 1 year)
 
 Options:
   -g, --to-gregorian <date>      Bangla date to convert to Gregorian
@@ -50,6 +53,8 @@ Options:
       --variant <variant>        revised (default), pre-2019 or historical
       --zone <zone>              for "today": Asia/Dhaka (default), UTC, local or an offset in minutes
       --week-start <n>           first column of "month": 0 = Sunday (default) ... 6 = Saturday
+      --events-only              for "ics": only the national days
+      --days-only                for "ics": only the daily dates
   -h, --help                     show this help
   -v, --version                  show the version
 
@@ -225,6 +230,30 @@ function runInner(argv: string[], io: CliIo): number {
       );
       return 0;
     }
+    case 'ics': {
+      if (args.length > 2) throw new UsageError('ics takes at most a year and a count of years');
+      if (v['events-only'] && v['days-only'])
+        throw new UsageError('Give either --events-only or --days-only');
+      const year = args[0] !== undefined ? int(args[0], 'year') : current().year;
+      const years = args[1] !== undefined ? int(args[1], 'count') : 1;
+      const include = v['events-only'] ? 'events' : v['days-only'] ? 'days' : 'both';
+      let text: string;
+      try {
+        text = toICalendar(year, {
+          years,
+          include,
+          locale,
+          digits,
+          variant,
+          now,
+          ...(ctx.pattern !== undefined ? { pattern: ctx.pattern } : {}),
+        });
+      } catch (err) {
+        throw new UsageError(err instanceof Error ? err.message : String(err));
+      }
+      io.stdout(text);
+      return 0;
+    }
     default: {
       // A bare date: `bangla-calendar 2026-11-16`.
       if (parseIsoDate(command)) return runInner(['convert', command, ...rest(argv, command)], io);
@@ -259,6 +288,8 @@ function parse(argv: string[]) {
       variant: { type: 'string' },
       zone: { type: 'string' },
       'week-start': { type: 'string' },
+      'events-only': { type: 'boolean' },
+      'days-only': { type: 'boolean' },
       help: { type: 'boolean', short: 'h' },
       version: { type: 'boolean', short: 'v' },
     },

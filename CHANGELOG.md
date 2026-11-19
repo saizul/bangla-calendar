@@ -6,6 +6,15 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- iCalendar export: `toICalendar(year, options)` and the `bangla-calendar ics [year] [count]` command write an
+  RFC 5545 file with one all-day event per Bangla day (titled with the Bangla date, pattern configurable) and the
+  national days, for one or more years. `--events-only` / `--days-only` (`include`) pick one kind. UIDs are
+  stable, `DTSTAMP` can be fixed (`now`) for reproducible files, and lines are folded at 75 octets without
+  splitting UTF-8 sequences. Helpers `escapeICalText()` and `foldICalLine()` are exported.
+- A code of conduct, issue forms and a pull request template.
+
 ## [0.1.0] - 2026-11-16
 
 ### Added

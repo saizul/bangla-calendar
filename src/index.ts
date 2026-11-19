@@ -61,6 +61,7 @@ export {
   parseIsoDate,
   weekdayFromDays,
 } from './gregorian.js';
+export { escapeICalText, foldICalLine, type ICalendarOptions, toICalendar } from './ical.js';
 export {
   displayWidth,
   type MonthGrid,
