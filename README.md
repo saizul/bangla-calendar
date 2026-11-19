@@ -169,6 +169,8 @@ this library changes the date at midnight.
 - Date arithmetic: `addDays`, `addMonths`, `diffDays`, `compareBangla`.
 - Month grids and a text month view, and the national days fixed by the
   revision.
+- iCalendar (`.ics`) export of every Bangla day and the national days, to
+  subscribe to or import into Google Calendar, Apple Calendar or Outlook.
 
 ## Install
 
@@ -302,6 +304,8 @@ eventsInYear(1433).map((e) => e.gregorian); // Gregorian dates of the national d
 | `banglaOrdinalSuffix(day)`, `englishOrdinalSuffix(day)` | Ordinal suffixes. |
 | `monthGrid`, `renderMonth`, `displayWidth` | Month views. |
 | `EVENTS`, `eventsOn`, `eventsInYear` | National days fixed by the revision. |
+| `toICalendar(year, { years?, include?, locale?, digits?, pattern?, name?, now?, variant? })` | iCalendar file with the days (`include: 'days'`), national days (`'events'`) or both (default) of one or more Bangla years. |
+| `escapeICalText`, `foldICalLine` | iCalendar text escaping and 75-octet line folding (UTF-8 safe). |
 | `daysFromCivil`, `civilFromDays`, `isGregorianLeapYear`, `parseIsoDate`, `formatIsoDate`, `weekdayFromDays` | Gregorian helpers. |
 | `instantToDays(instant, zone)`, `DHAKA_OFFSET_MINUTES` | Time zone helpers. |
 
@@ -339,10 +343,30 @@ $ bangla-calendar events 1433
 ...
 ```
 
+### Calendar file
+
+`ics` writes an iCalendar file with one all-day event per day of a Bangla
+year, titled with its Bangla date, and the national days of that year. Import
+it once, or publish it on a web server and subscribe to its URL:
+
+```console
+$ bangla-calendar ics 1433 > bangla-1433.ics          # every day and national day of 1433
+$ bangla-calendar ics 1433 3 --events-only --en > national-days.ics
+$ bangla-calendar ics --days-only -f "D MMMM" > this-year.ics
+```
+
+`[year]` defaults to the current Bangla year and `[count]` to one year.
+`--format` sets the title of the daily events, `--locale` and `--digits`
+their language. Event UIDs are stable (`bangla-1433-01-01@bangla-calendar`),
+so re-importing a new file updates the events instead of duplicating them.
+Lines are folded at 75 octets without splitting Bangla letters, as RFC 5545
+requires.
+
 Options: `--to-gregorian` / `-g`, `--locale bn|bn-Latn|en` (or `--en`),
 `--digits bn|latn`, `--format <pattern>`, `--json`,
 `--variant revised|pre-2019|historical`,
-`--zone Asia/Dhaka|UTC|local|<minutes>` and `--week-start 0-6`. Exit code 0 on
+`--zone Asia/Dhaka|UTC|local|<minutes>`, `--week-start 0-6`, and
+`--events-only` / `--days-only` for `ics`. Exit code 0 on
 success and 2 on invalid input.
 
 ## Examples
@@ -403,8 +427,8 @@ CI runs on Node 20 and 22.
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). Security issues: see
-[SECURITY.md](SECURITY.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md) and the [code of conduct](CODE_OF_CONDUCT.md).
+Security issues: see [SECURITY.md](SECURITY.md).
 
 ## License
 

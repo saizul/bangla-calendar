@@ -109,4 +109,22 @@ describe('cli', () => {
       assert.match(r.stderr, /^bangla-calendar: /);
     }
   });
+  it('writes an iCalendar file', async () => {
+    const r = await cli('ics', '1433', '--events-only', '--en');
+    assert.equal(r.code, 0);
+    assert.ok(r.stdout.startsWith('BEGIN:VCALENDAR\r\n'));
+    assert.equal(r.stdout.match(/BEGIN:VEVENT/g)?.length, 7);
+    assert.match(r.stdout, /SUMMARY:Victory Day\r\n/);
+    assert.match(r.stdout, /DTSTAMP:20261115T183000Z/);
+    const days = await cli('ics', '--days-only', '-f', 'D MMMM');
+    assert.equal(days.stdout.match(/BEGIN:VEVENT/g)?.length, 365);
+    assert.match(days.stdout, /SUMMARY:১ বৈশাখ\r\n/);
+    assert.equal((await cli('ics', '1433', '2')).stdout.match(/BEGIN:VEVENT/g)?.length, 365 + 366 + 14); // 1434 is a leap year
+  });
+
+  it('rejects bad ics arguments', async () => {
+    assert.equal((await cli('ics', '--events-only', '--days-only')).code, 2);
+    assert.equal((await cli('ics', '1433', '0')).code, 2);
+    assert.equal((await cli('ics', '1', '2', '3')).code, 2);
+  });
 });
